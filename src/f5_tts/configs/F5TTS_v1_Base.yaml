@@ -20,7 +20,7 @@ optim:
 model:
   name: F5TTS_v1_Base # model name
   tokenizer: custom # ban đầu nó là pinyin. nếu không phải là custom thì tokenizer_path bên dưới phải là null. và lúc này train.py nó có logic luôn lấy name của dataset gắn thêm chữ pinyin.
-  tokenizer_path: /content/F5-TTS-2/data/Emilia_ZH_EN_pinyin_VN/vocab.txt # if 'custom' tokenizer, define the path want to use (should be vocab.txt)
+  tokenizer_path: /content/F5-TTS-2/data/Emilia_ZH_EN_pinyin_VN_custom/vocab.txt # if 'custom' tokenizer, define the path want to use (should be vocab.txt)
   backbone: DiT
   arch:
     dim: 1024
