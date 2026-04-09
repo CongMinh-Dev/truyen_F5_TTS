@@ -387,8 +387,9 @@ class Trainer:
                         self.ema_model.update()
 
                     global_update += 1
-                    progress_bar.update(1)
-                    progress_bar.set_postfix(update=str(global_update), loss=loss.item())
+                    # update tiền độ và in ra log mỗi patch, điều này nhiều quá làm colab bị lag
+                    # progress_bar.update(1)
+                    # progress_bar.set_postfix(update=str(global_update), loss=loss.item())
 
                 if self.accelerator.is_local_main_process:
                     self.accelerator.log(
@@ -435,7 +436,8 @@ class Trainer:
                             f"{log_samples_path}/update_{global_update}_ref.wav", ref_audio, target_sample_rate
                         )
                         self.model.train()
-
+        progress_bar.set_postfix(update=str(global_update), loss=loss.item()) 
+        progress_bar.update(len(current_dataloader)) # Đẩy thanh tiến độ lên 100% một lần duy nhất
         self.save_checkpoint(global_update, last=True)
 
         self.accelerator.end_training()
