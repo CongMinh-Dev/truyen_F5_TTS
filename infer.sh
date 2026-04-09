@@ -5,7 +5,8 @@ f5-tts_infer-cli \
 --gen_text "mình muốn ra nước ngoài để tiếp xúc nhiều công ty lớn, sau đó mang những gì học được về việt nam giúp xây dựng các công trình tốt hơn" \
 --speed 1.0 \
 --vocoder_name vocos \
---ckpt_file ckpts/model_last.pt \
+--vocab_file data/Emilia_ZH_EN_pinyin/vocab.txt \
+--ckpt_file ckpts/F5TTS_v1_Base_vocos_custom_Emilia_ZH_EN/model_last.pt
 # --output_dir  nếu không truyền thì nó tự tạo thư mục test ở cấp ngoài cùng, rồi lưu vào đó
 # --vocab_file data/your_training_dataset/vocab.txt \
 # --ckpt_file ckpts/your_training_dataset/model_last.pt \

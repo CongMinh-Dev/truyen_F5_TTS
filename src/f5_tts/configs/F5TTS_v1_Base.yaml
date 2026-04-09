@@ -3,14 +3,14 @@ hydra:
     dir: ckpts/${model.name}_${model.mel_spec.mel_spec_type}_${model.tokenizer}_${datasets.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
 
 datasets:
-  name: Emilia_ZH_EN # đường dẫn đến dataset sau khi được xử lý bằng file prepare_csv_wavs.py
+  name: Emilia_ZH_EN_pinyin_VN # đường dẫn đến dataset sau khi được xử lý bằng file prepare_csv_wavs.py
   batch_size_per_gpu: 4000 # 8 GPUs, 8 * 38400 = 307200
   batch_size_type: frame # frame | sample
   max_samples: 64 # max sequences per batch if use frame-wise batch_size. we set 32 for small models, 64 for base models
   num_workers: 2 #nhân CPU
 
 optim:
-  epochs: 11
+  epochs: 200
   learning_rate: 7.5e-5
   num_warmup_updates: 20000 # warmup updates
   grad_accumulation_steps: 1 # note: updates = steps / grad_accumulation_steps
@@ -20,7 +20,7 @@ optim:
 model:
   name: F5TTS_v1_Base # model name
   tokenizer: custom # ban đầu nó là pinyin. nếu không phải là custom thì tokenizer_path bên dưới phải là null. và lúc này train.py nó có logic luôn lấy name của dataset gắn thêm chữ pinyin.
-  tokenizer_path: /content/F5-TTS-2/data/Emilia_ZH_EN_custom/vocab.txt # if 'custom' tokenizer, define the path want to use (should be vocab.txt)
+  tokenizer_path: /content/F5-TTS-2/data/Emilia_ZH_EN_pinyin_VN/vocab.txt # if 'custom' tokenizer, define the path want to use (should be vocab.txt)
   backbone: DiT
   arch:
     dim: 1024
