@@ -13,7 +13,7 @@ from ema_pytorch import EMA
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import LinearLR, SequentialLR
 from torch.utils.data import DataLoader, Dataset, SequentialSampler
-from tqdm.notebook import tqdm
+from tqdm.auto import tqdm
 
 from f5_tts.model import CFM
 from f5_tts.model.dataset import DynamicBatchSampler, collate_fn
@@ -351,18 +351,16 @@ class Trainer:
             if hasattr(train_dataloader, "batch_sampler") and hasattr(train_dataloader.batch_sampler, "set_epoch"):
                 train_dataloader.batch_sampler.set_epoch(epoch)
 
-            
-            pbar = tqdm(
-                current_dataloader,
+            progress_bar = tqdm(
+                # range(math.ceil(len(train_dataloader) / self.grad_accumulation_steps)),
+                total=math.ceil(len(train_dataloader) / self.grad_accumulation_steps),
                 desc=f"Epoch {epoch + 1}/{self.epochs}",
-                unit="batch", # Đổi thành batch vì nó đang đếm theo số lần lặp batch
+                unit="update",
                 disable=not self.accelerator.is_local_main_process,
                 initial=progress_bar_initial,
-                total=len(current_dataloader),
-                leave=True
             )
 
-            for batch in pbar:
+            for batch in current_dataloader:
                 with self.accelerator.accumulate(self.model):
                     text_inputs = batch["text"]
                     mel_spec = batch["mel"].permute(0, 2, 1)
@@ -390,14 +388,12 @@ class Trainer:
                         self.ema_model.update()
 
                     global_update += 1
-                 
+                    # update tiền độ và in ra log mỗi patch, điều này nhiều quá làm colab bị lag
+                    progress_bar.update(1)
+                    progress_bar.set_postfix(update=str(global_update), loss=loss.item())
+                    progress_bar.refresh()
 
                 if self.accelerator.is_local_main_process:
-                    pbar.set_postfix({
-                        "step": global_update, 
-                        "loss": f"{loss.item():.4f}"
-                    })
-
                     self.accelerator.log(
                         {"loss": loss.item(), "lr": self.scheduler.get_last_lr()[0]}, step=global_update
                     )
@@ -442,7 +438,9 @@ class Trainer:
                             f"{log_samples_path}/update_{global_update}_ref.wav", ref_audio, target_sample_rate
                         )
                         self.model.train()
-        pbar.close()
+        # progress_bar.set_postfix(update=str(global_update), loss=loss.item()) 
+        # progress_bar.update(len(current_dataloader)) # Đẩy thanh tiến độ lên 100% một lần duy nhất
+        # progress_bar.close() #đóng thanh bar tiến độ sao mỗi epoch
         self.save_checkpoint(global_update, last=True)
 
         self.accelerator.end_training()
