@@ -49,7 +49,7 @@ model:
 ckpts:
   logger: wandb # wandb | tensorboard | null
   log_samples: True # infer random sample per save checkpoint. wip, normal to fail with extra long samples
-  save_per_updates: 50000 # save checkpoint per updates
+  save_per_updates: 250 # save checkpoint per updates. theo cấu hình hiện tại thì 1 epoch khoảng 250 updates. số ban đầu là 50000
   keep_last_n_checkpoints: -1 # -1 to keep all, 0 to not save intermediate, > 0 to keep last N checkpoints
   last_per_updates: 5000 # save last checkpoint per updates
   save_dir: ckpts/${model.name}_${model.mel_spec.mel_spec_type}_${model.tokenizer}_${datasets.name}
