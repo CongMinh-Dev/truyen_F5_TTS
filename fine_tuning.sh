@@ -21,7 +21,11 @@ NUM_WOKERS=16
 WARMUP_UPDATES=20000
 SAVE_UPDATES=10000
 LAST_UPDATES=10000
-PRETRAIN_CKPT="/mnt/d/ckpts/your_training_dataset/pretrained_model_1200000.pt"
+ORIGIN_PRETRAIN_CKPT="ckpts/your_training_dataset/my_model.pt"
+# PRETRAIN_CKPT="/mnt/d/ckpts/your_training_dataset/pretrained_model_1200000.pt"
+PRETRAIN_CKPT="ckpts/your_training_dataset/pretrained_model_1200000.pt" #không cần thay đổi vì file extend_embedding_pretrained.py nó mặc định tạo ra model tên là pretrained_model_1200000.pt
+
+
 
 # Tạo các biến stage để quản lý pipeline, bước nào đã chạy rồi thì không cần chạy lại
 stage=5
@@ -48,7 +52,7 @@ fi
 # Mở rộng embedding của mô hình pretrained để hỗ trợ bộ từ vựng mới
 if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
     log "Extend embedding pretrained with new vocab ... "
-    python extend_embedding_pretrained.py
+    python extend_embedding_pretrained.py --pretrain "$ORIGIN_PRETRAIN_CKPT"
 fi
 
 # Trích xuất đặc trưng

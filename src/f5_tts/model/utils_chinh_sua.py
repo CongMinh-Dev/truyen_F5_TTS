@@ -1,3 +1,6 @@
+# ruff: noqa: F722 F821
+#chỉnh sửa convert_char_to_pinyin phù hợp cho tiếng việt
+
 from __future__ import annotations
 
 import os
@@ -5,11 +8,10 @@ import random
 from collections import defaultdict
 from importlib.resources import files
 
+import rjieba
 import torch
+from pypinyin import Style, lazy_pinyin
 from torch.nn.utils.rnn import pad_sequence
-
-import jieba
-from pypinyin import lazy_pinyin, Style
 
 
 # seed everything
@@ -36,10 +38,20 @@ def default(v, d):
     return v if exists(v) else d
 
 
+def is_package_available(package_name: str) -> bool:
+    try:
+        import importlib
+
+        package_exists = importlib.util.find_spec(package_name) is not None
+        return package_exists
+    except Exception:
+        return False
+
+
 # tensor helpers
 
 
-def lens_to_mask(t: int["b"], length: int | None = None) -> bool["b n"]:  # noqa: F722 F821
+def lens_to_mask(t: int["b"], length: int | None = None) -> bool["b n"]:
     if not exists(length):
         length = t.amax()
 
@@ -47,7 +59,7 @@ def lens_to_mask(t: int["b"], length: int | None = None) -> bool["b n"]:  # noqa
     return seq[None, :] < t[:, None]
 
 
-def mask_from_start_end_indices(seq_len: int["b"], start: int["b"], end: int["b"]):  # noqa: F722 F821
+def mask_from_start_end_indices(seq_len: int["b"], start: int["b"], end: int["b"]):
     max_seq_len = seq_len.max().item()
     seq = torch.arange(max_seq_len, device=start.device).long()
     start_mask = seq[None, :] >= start[:, None]
@@ -55,7 +67,7 @@ def mask_from_start_end_indices(seq_len: int["b"], start: int["b"], end: int["b"
     return start_mask & end_mask
 
 
-def mask_from_frac_lengths(seq_len: int["b"], frac_lengths: float["b"]):  # noqa: F722 F821
+def mask_from_frac_lengths(seq_len: int["b"], frac_lengths: float["b"]):
     lengths = (frac_lengths * seq_len).long()
     max_start = seq_len - lengths
 
@@ -66,7 +78,7 @@ def mask_from_frac_lengths(seq_len: int["b"], frac_lengths: float["b"]):  # noqa
     return mask_from_start_end_indices(seq_len, start, end)
 
 
-def maybe_masked_mean(t: float["b n d"], mask: bool["b n"] = None) -> float["b d"]:  # noqa: F722
+def maybe_masked_mean(t: float["b n d"], mask: bool["b n"] = None) -> float["b d"]:
     if not exists(mask):
         return t.mean(dim=1)
 
@@ -78,7 +90,7 @@ def maybe_masked_mean(t: float["b n d"], mask: bool["b n"] = None) -> float["b d
 
 
 # simple utf-8 tokenizer, since paper went character based
-def list_str_to_tensor(text: list[str], padding_value=-1) -> int["b nt"]:  # noqa: F722
+def list_str_to_tensor(text: list[str], padding_value=-1) -> int["b nt"]:
     list_tensors = [torch.tensor([*bytes(t, "UTF-8")]) for t in text]  # ByT5 style
     text = pad_sequence(list_tensors, padding_value=padding_value, batch_first=True)
     return text
@@ -89,7 +101,7 @@ def list_str_to_idx(
     text: list[str] | list[list[str]],
     vocab_char_map: dict[str, int],  # {char: idx}
     padding_value=-1,
-) -> int["b nt"]:  # noqa: F722
+) -> int["b nt"]:
     list_idx_tensors = [torch.tensor([vocab_char_map.get(c, 0) for c in t]) for t in text]  # pinyin or char style
     text = pad_sequence(list_idx_tensors, padding_value=padding_value, batch_first=True)
     return text
@@ -109,7 +121,7 @@ def get_tokenizer(dataset_name, tokenizer: str = "pinyin"):
                 - if use "byte", set to 256 (unicode byte range)
     """
     if tokenizer in ["pinyin", "char"]:
-        tokenizer_path = os.path.join(files("f5_tts").joinpath("../../data"), f"{dataset_name}/vocab.txt")
+        tokenizer_path = os.path.join(files("f5_tts").joinpath("../../data"), f"{dataset_name}_{tokenizer}/vocab.txt")
         with open(tokenizer_path, "r", encoding="utf-8") as f:
             vocab_char_map = {}
             for i, char in enumerate(f):
@@ -132,51 +144,44 @@ def get_tokenizer(dataset_name, tokenizer: str = "pinyin"):
 
 
 # convert char to pinyin
-
-
 def convert_char_to_pinyin(text_list, polyphone=True):
-    if jieba.dt.initialized is False:
-        jieba.default_logger.setLevel(50)  # CRITICAL
-        jieba.initialize()
-
     final_text_list = []
     custom_trans = str.maketrans(
         {";": ",", "“": '"', "”": '"', "‘": "'", "’": "'"}
-    )  # add custom trans here, to address oov
+    )
 
     def is_chinese(c):
-        return (
-            "\u3100" <= c <= "\u9fff"  # common chinese characters
-        )
+        # Kiểm tra ký tự thuộc dải chữ Hán
+        return "\u4e00" <= c <= "\u9fff"
 
     for text in text_list:
         char_list = []
-        text = text.translate(custom_trans)
-        for seg in jieba.cut(text):
-            seg_byte_len = len(bytes(seg, "UTF-8"))
-            if seg_byte_len == len(seg):  # if pure alphabets and symbols
-                if char_list and seg_byte_len > 1 and char_list[-1] not in " :'\"":
-                    char_list.append(" ")
-                char_list.extend(seg)
-            elif polyphone and seg_byte_len == 3 * len(seg):  # if pure east asian characters
-                seg_ = lazy_pinyin(seg, style=Style.TONE3, tone_sandhi=True)
+        # Chuyển về chữ thường để model học ổn định hơn
+        text = text.translate(custom_trans).lower()
+        
+        # Sử dụng rjieba để cắt từ (giữ nguyên yêu cầu của bạn)
+        for seg in rjieba.cut(text):
+            # Kiểm tra xem đoạn cắt (segment) có chứa chữ Hán không
+            if any(is_chinese(c) for c in seg):
+                # NHÁNH TIẾNG TRUNG: Chuyển sang Pinyin
+                pinyin_list = lazy_pinyin(seg, style=Style.TONE3, tone_sandhi=True)
                 for i, c in enumerate(seg):
                     if is_chinese(c):
-                        char_list.append(" ")
-                    char_list.append(seg_[i])
-            else:  # if mixed characters, alphabets and symbols
-                for c in seg:
-                    if ord(c) < 256:
-                        char_list.extend(c)
-                    elif is_chinese(c):
-                        char_list.append(" ")
-                        char_list.extend(lazy_pinyin(c, style=Style.TONE3, tone_sandhi=True))
+                        char_list.append(" ") # Thêm khoảng cách trước chữ Hán
+                        char_list.append(pinyin_list[i])
                     else:
                         char_list.append(c)
+            else:
+                # NHÁNH TIẾNG VIỆT & TIẾNG ANH: Giữ nguyên ký tự có dấu
+                # Thêm khoảng cách hợp lý để tránh dính chữ
+                if char_list and char_list[-1] not in " :'\"":
+                    if len(seg) > 1:
+                        char_list.append(" ")
+                char_list.extend(list(seg))
+                
         final_text_list.append(char_list)
 
     return final_text_list
-
 
 # filter func for dirty data with many repetitions
 
@@ -190,3 +195,22 @@ def repetition_found(text, length=2, tolerance=10):
         if count > tolerance:
             return True
     return False
+
+
+# get the empirically pruned step for sampling
+
+
+def get_epss_timesteps(n, device, dtype):
+    dt = 1 / 32
+    predefined_timesteps = {
+        5: [0, 2, 4, 8, 16, 32],
+        6: [0, 2, 4, 6, 8, 16, 32],
+        7: [0, 2, 4, 6, 8, 16, 24, 32],
+        10: [0, 2, 4, 6, 8, 12, 16, 20, 24, 28, 32],
+        12: [0, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32],
+        16: [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32],
+    }
+    t = predefined_timesteps.get(n, [])
+    if not t:
+        return torch.linspace(0, 1, n + 1, device=device, dtype=dtype)
+    return dt * torch.tensor(t, device=device, dtype=dtype)
