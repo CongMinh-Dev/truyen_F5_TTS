@@ -6,11 +6,12 @@ f5-tts_infer-cli \
 --speed 1.0 \
 --vocoder_name vocos \
 --vocab_file data/Emilia_ZH_EN_pinyin/vocab.txt \
---ckpt_file ckpts/model_last.pt
-# --output_dir  nếu không truyền thì nó tự tạo thư mục test ở cấp ngoài cùng, rồi lưu vào đó
-
+--ckpt_file ckpts/model_last.pt \
+--output_dir "output" \
+--output_file "mot.wav" \
+# --output_dir  nếu không truyền thì nó tự tạo thư mục test ở cấp ngoài cùng, rồi lưu vào đó. nếu truyền thì nó tự tạo một thư mục nằm bên trong source rồi lưu vào đó
+# --output_file "mot.wav" , không truyền thì nó có logic đặt tên mặc định
 # đường dẫn đến vocab mới, không thì xài vocab mẫu trong Emilia_ZH_EN_pinyin cũng được, nó đủ cho tiếng việt rồi.
 # --vocab_file data/your_training_dataset/vocab.txt \
-
 # --ckpt_file ckpts/your_training_dataset/model_last.pt \
-
+# --model "F5TTS_Base"  là tên của file yaml mà model được train từ nó, chứ không phải tên model mình đã train đâu nha
