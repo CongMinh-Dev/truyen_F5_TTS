@@ -74,6 +74,6 @@ def convert_voice_loa_phat_thanh(input_path, background_path, output_path):
 input_voice = "/content/F5-TTS-2/infer_cli_basic_(2).wav"
 background_sound = "" # Để rỗng nếu không cần nền
 output_file = "/content/F5-TTS-2/loa_phat_thanh_hoan_thien.wav"
-
-# Chạy
-convert_voice_loa_phat_thanh(input_voice, background_sound, output_file)
+if __name__ == "__main__":
+    # Chạy
+    convert_voice_loa_phat_thanh(input_voice, background_sound, output_file)

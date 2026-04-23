@@ -40,5 +40,6 @@ def convert_voice_suy_nghi(input_path, output_path, pan=-0.15):
     
     print(f"Đã hoàn thành bản Final với Panning = {pan} tại: {output_path}")
 
-# Sử dụng: pan=-0.15 giúp giọng hơi lệch sang tai trái một chút, nghe rất 'nội tâm'
-convert_voice_suy_nghi("/content/F5-TTS-2/infer_cli_basic_(2).wav", "/content/F5-TTS-2/infer_cli_basic_output_pro.wav", pan=-0.15)
+if __name__ == "__main__":
+    # Sử dụng: pan=-0.15 giúp giọng hơi lệch sang tai trái một chút, nghe rất 'nội tâm'
+    convert_voice_suy_nghi("/content/F5-TTS-2/infer_cli_basic_(2).wav", "/content/F5-TTS-2/infer_cli_basic_output_pro.wav", pan=-0.15)

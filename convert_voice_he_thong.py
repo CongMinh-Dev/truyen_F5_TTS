@@ -67,5 +67,6 @@ input_voice = "/content/F5-TTS-2/infer_cli_basic_(2).wav"
 background_sound = "/content/F5-TTS-2/sound_bg_he_thong.MP3"
 output_file = "/content/F5-TTS-2/system_voice_final_with_bg.wav"
 
-# Chạy
-convert_voice_he_thong(input_voice, background_sound, output_file)
+if __name__ == "__main__":
+    # Chạy
+    convert_voice_he_thong(input_voice, background_sound, output_file)
