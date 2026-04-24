@@ -32,6 +32,8 @@ from convert_voice_loa_phat_thanh import convert_voice_loa_phat_thanh
 from convert_voice_he_thong import convert_voice_he_thong
 from convert_voice_suy_nghi import convert_voice_suy_nghi
 
+
+
 app = Flask(__name__)
 CORS(app)
 
@@ -78,11 +80,12 @@ def convert_text():
         if not os.path.exists(ref_audio_path):
             return jsonify({"error": f"Không tìm thấy audio mẫu: {ref_audio_path}"}), 400
 
-        current_ref_text = get_model_content(MP3_DIR, model_name)
 
         # --- QUAN TRỌNG: XỬ LÝ GENERATOR ---
         wave_path = Path(OUTPUT_DIR) / file_name
         wave_path_tam_thoi = os.path.join(OUTPUT_DIR, f"tam_{file_name}")
+        ref_text = get_model_content(MP3_DIR, model_name)
+        ref_audio = os.path.join(MP3_DIR, model_name, f"{model_name}.MP3")
 
         main_voice = {"ref_audio": ref_audio, "ref_text": ref_text}
         voices = {"main": main_voice}
@@ -169,6 +172,7 @@ def convert_text():
             return response
 
         return send_file(wave_path, as_attachment=True)
+        
 
     except Exception as e:
         print(f"Lỗi: {e}")
