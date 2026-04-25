@@ -12,8 +12,8 @@ def convert_voice_he_thong(input_path, background_path, output_path):
 
     board = Pedalboard([
         HighpassFilter(cutoff_frequency_hz=450),
-        Phaser(rate_hz=2.0, depth=0.8, feedback=0.6, centre_frequency_hz=1000), #càng lớn là càng giật giật
-        Bitcrush(bit_depth=16), #càng lớn là càng rè
+        Phaser(rate_hz=1.0, depth=0.8, feedback=0.6, centre_frequency_hz=1000), #càng lớn là càng giật giật
+        Bitcrush(bit_depth=10), #càng lớn là càng rè
         Chorus(rate_hz=4.0, depth=0.3, feedback=0.3),
         Distortion(drive_db=5),
         Reverb(room_size=0.15, damping=0.4, wet_level=0.25, dry_level=0.75),
@@ -35,9 +35,8 @@ def convert_voice_he_thong(input_path, background_path, output_path):
     voice_segment = AudioSegment.from_file(temp_voice)
     bg_segment = AudioSegment.from_file(background_path)
 
-    # 1. Tăng âm lượng nhạc nền (Chỉnh -3 hoặc 0 để nghe rõ hơn)
-    # Nếu vẫn thấy nhỏ, bạn có thể chỉnh thành +2 hoặc +5
-    bg_segment = bg_segment + 10
+    # 1. Tăng âm lượng nhạc nền:
+    bg_segment = bg_segment + 5
 
     # 2. Kéo dài nhạc nền cho khớp với giọng nói
     # Nếu nhạc nền ngắn hơn giọng nói, lặp lại nó cho đến khi dài hơn
