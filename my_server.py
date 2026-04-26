@@ -27,7 +27,7 @@ from f5_tts.infer.utils_infer import (
     sway_sampling_coef,
     fix_duration,
 )
-from my_function import get_model_content
+from my_function import get_model_content , trim_silence
 from convert_voice_loa_phat_thanh import convert_voice_loa_phat_thanh
 from convert_voice_he_thong import convert_voice_he_thong
 from convert_voice_suy_nghi import convert_voice_suy_nghi
@@ -74,21 +74,21 @@ def convert_text():
         model_name = data.get('model_name')
         file_name = f"{data.get('fileName', 'output')}.wav"
         # toc_do_doc = float(data.get('toc_do_doc', 1.0))
-        toc_do_doc = float(0.8)
+        toc_do_doc = float(0.7)
         suy_nghi = int(data.get('suy_nghi', 0))
         character = data.get('character')
 
 
-        ref_audio_path = f"{MP3_DIR}/{model_name}/{model_name}.MP3"
+        ref_audio_path = f"{MP3_DIR}/{model_name}/{model_name}.mp3"
         if not os.path.exists(ref_audio_path):
-            return jsonify({"error": f"Không tìm thấy audio mẫu: {ref_audio_path}"}), 400
+            return jsonify({"error": f"Không tìm thấy audio mẫu: {ref_audio_path} tại {file_name}"}), 400
 
 
         # --- QUAN TRỌNG: XỬ LÝ GENERATOR ---
         wave_path = str(Path(OUTPUT_DIR) / file_name) #vì path trả  về PosixPath (Một đối tượng/object). nên cần biến nó thành string
         wave_path_tam_thoi = os.path.join(OUTPUT_DIR, f"tam_{file_name}")
         ref_text = get_model_content(MP3_DIR, model_name)
-        ref_audio = os.path.join(MP3_DIR, model_name, f"{model_name}.MP3")
+        ref_audio = os.path.join(MP3_DIR, model_name, f"{model_name}.mp3")
 
         main_voice = {"ref_audio": ref_audio, "ref_text": ref_text}
         voices = {"main": main_voice}
@@ -156,11 +156,14 @@ def convert_text():
 
         # -----------------------------------
 
+
         # Hậu xử lý
+        trim_silence(wave_path_tam_thoi, wave_path_tam_thoi)
+
         if suy_nghi != 0:
             convert_voice_suy_nghi(wave_path_tam_thoi, wave_path, pan=-0.15)
         elif character == "hop_thoai_may":
-            convert_voice_he_thong(wave_path_tam_thoi, f"{MP3_DIR}/sound_bg_he_thong.MP3", wave_path)
+            convert_voice_he_thong(wave_path_tam_thoi, f"{MP3_DIR}/sound_bg_he_thong.mp3", wave_path)
         elif character == "loa_phat_thanh":
             convert_voice_loa_phat_thanh(wave_path_tam_thoi, "", wave_path)
         else:
