@@ -21,7 +21,7 @@ def get_model_content(path, model_name):
 from pydub import AudioSegment
 from pydub.silence import detect_leading_silence
 
-def trim_silence(input_path, output_path, silence_threshold=-40.0, chunk_size=10, padding_ms=200):
+def trim_silence(input_path, output_path, silence_threshold=-40.0, chunk_size=10, padding_ms=40):
     """
     Cắt bỏ khoảng lặng ở đầu và cuối nhưng giữ lại một khoảng đệm (padding) để âm thanh tự nhiên hơn.
     input_path và output_path được phép trùng nhau, nó sẽ ghi đè

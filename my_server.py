@@ -97,8 +97,8 @@ def convert_text():
         # gen_text = data.get('text')
         model_name = data.get('model_name')
         file_name = f"{data.get('fileName', 'output')}.wav"
-        # toc_do_doc = float(data.get('toc_do_doc', 1.0))
-        toc_do_doc = float(0.7)
+        toc_do_doc = float(data.get('toc_do_doc', 0.8))
+        # toc_do_doc = float(0.7)
         suy_nghi = int(data.get('suy_nghi', 0))
         character = data.get('character')
 
