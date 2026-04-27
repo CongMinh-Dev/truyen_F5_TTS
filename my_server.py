@@ -9,6 +9,8 @@ from flask_cors import CORS
 from omegaconf import OmegaConf
 from hydra.utils import get_class
 from pathlib import Path
+import requests #để gọi hàm bên env khác
+PUNCT_SERVER_URL = "http://127.0.0.1:5556/fix_punct"
 
 # Thêm đường dẫn
 sys.path.insert(0, "/content/F5-TTS-2")
@@ -70,7 +72,29 @@ print("✅ Model đã nạp thành công!")
 def convert_text():
     try:
         data = request.get_json()
-        gen_text = data.get('text')
+
+        raw_text = data.get('text') #lấy từ FE
+        # --- BƯỚC GỌI SERVER python 3.7 ĐỂ FIX DẤU CÂU ---
+        try:
+            # Gửi request POST sang port 5556
+            response = requests.post(
+                PUNCT_SERVER_URL, 
+                json={"text": raw_text}, 
+                timeout=10 # Đợi tối đa 10 giây
+            )
+            
+            if response.status_code == 200:
+                gen_text = response.json().get('fixed_text', raw_text)
+                print(f"✅ Đã thêm dấu câu: {gen_text}")
+            else:
+                print(f"⚠️ Server Punctuation trả lỗi, dùng văn bản gốc.")
+                gen_text = raw_text
+        except Exception as e:
+            print(f"❌ Không kết nối được Server Punctuation: {e}")
+            gen_text = raw_text
+        
+        # -----lấy value từ FE
+        # gen_text = data.get('text')
         model_name = data.get('model_name')
         file_name = f"{data.get('fileName', 'output')}.wav"
         # toc_do_doc = float(data.get('toc_do_doc', 1.0))
