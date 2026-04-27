@@ -53,6 +53,9 @@ def trim_silence(input_path, output_path, silence_threshold=-40.0, chunk_size=10
         # 4. Cắt file với khoảng đệm đã tính toán
         trimmed_audio = audio[actual_start:actual_end]
 
+        # tạo âm thanh nhỏ xuống ở cuối file , lớn lên ở đầu file 1 cách từ từ
+        trimmed_audio = trimmed_audio.fade_in(20).fade_out(20)
+
         # 5. Xuất file
         trimmed_audio.export(output_path, format="wav")
         

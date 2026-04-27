@@ -52,6 +52,7 @@ def convert_voice_he_thong(input_path, background_path, output_path):
     combined = voice_segment.overlay(bg_segment)
 
     # Xuất file
+    combined = combined.fade_out(50)
     combined.export(output_path, format="wav")
     
     # Xóa file tạm

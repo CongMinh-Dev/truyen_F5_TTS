@@ -85,7 +85,7 @@ def convert_text():
             
             if response.status_code == 200:
                 gen_text = response.json().get('fixed_text', raw_text)
-                print(f"✅ Đã thêm dấu câu: {gen_text}")
+                print(f"🛠️Đã thêm dấu câu: {gen_text}")
             else:
                 print(f"⚠️ Server Punctuation trả lỗi, dùng văn bản gốc.")
                 gen_text = raw_text
