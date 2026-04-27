@@ -15,9 +15,9 @@ def convert_voice_he_thong(input_path, background_path, output_path):
         Phaser(rate_hz=0.0, depth=0.8, feedback=0.6, centre_frequency_hz=1000), #càng lớn là càng giật giật
         Bitcrush(bit_depth=8), #càng lớn là càng rè
         Chorus(rate_hz=4.0, depth=0.3, feedback=0.3),
-        Distortion(drive_db=3), #càng lớn là âm thanh giọng nói càng méo, nghe càng chói tai. ban đầu là 5
+        Distortion(drive_db=1.5), #càng lớn là âm thanh giọng nói càng méo, nghe càng chói tai. ban đầu là 5
         Reverb(room_size=0.15, damping=0.4, wet_level=0.25, dry_level=0.75),
-        Gain(gain_db=2) #càng lớn thì âm tổng thể càng to. ban đầ là 4
+        Gain(gain_db=1) #càng lớn thì âm tổng thể càng to. ban đầ là 4
     ])
 
     effected = board(audio_data, samplerate)
