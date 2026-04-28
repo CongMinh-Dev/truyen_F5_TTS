@@ -8,8 +8,40 @@ import evaluate
 from sklearn.model_selection import train_test_split
 import re
 import gradio as gr
+import sys
+
+
+import argparse
+parser = argparse.ArgumentParser(
+    description="train va xuat model add dau cau.",
+)
+
+parser.add_argument(
+    "--path_dataset",
+    type=str,
+    help="path to dataset.json",
+)
+parser.add_argument(
+    "--path_output",
+    type=str,
+    help="path to xuat model",
+)
+args = parser.parse_args()
+
+path_dataset = args.path_dataset
+path_output = args.path_output
+
+if not path_dataset:
+    print("chưa nhập path_dataset")
+    sys.exit(1)
+
+if not path_output:
+    print("chưa nhập path_output")
+    sys.exit(1)
+
+
 # 3
-with open("/content/F5-TTS-2/bartpho-vn-punc-cap-recovery/data/dataset.json", "r", encoding="utf-8") as f:
+with open(f"{path_dataset}", "r", encoding="utf-8") as f:
     data = json.load(f)
 
 original_texts = [sample["original_text"] for sample in data]
@@ -72,10 +104,8 @@ trainer = Seq2SeqTrainer(
 trainer.train()
 
 # xuất model 
-output_dir = "/content/drive/MyDrive/model_add_dau_cau"
-
 import os
-os.makedirs(output_dir, exist_ok=True)
+os.makedirs(path_output, exist_ok=True)
 
-model.save_pretrained(output_dir)
-tokenizer.save_pretrained(output_dir)
+model.save_pretrained(path_output)
+tokenizer.save_pretrained(path_output)
