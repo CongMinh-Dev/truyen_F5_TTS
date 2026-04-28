@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 import re
 import gradio as gr
 # 3
-with open("/content/bartpho-vn-punc-cap-recovery/data/dataset.json", "r", encoding="utf-8") as f:
+with open("/content/F5-TTS-2/bartpho-vn-punc-cap-recovery/data/dataset.json", "r", encoding="utf-8") as f:
     data = json.load(f)
 
 original_texts = [sample["original_text"] for sample in data]
@@ -40,7 +40,7 @@ test_dataset = HFDataset.from_list(test_data)
 tokenized_train = train_dataset.map(preprocess_function, batched=True)
 tokenized_test = test_dataset.map(preprocess_function, batched=True)
 # 5
-model = AutoModelForSeq2SeqLM.from_pretrained("vinai/bartpho-syllable")
+model = AutoModelForSeq2SeqLM.from_pretrained("vinai/bartpho-syllable",use_safetensors=True)
 # 6
 from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer
 
@@ -48,7 +48,7 @@ training_args = Seq2SeqTrainingArguments(
     output_dir="./results",
     eval_strategy="epoch",
     learning_rate=5e-5,
-    per_device_train_batch_size=7,
+    per_device_train_batch_size=8,
     per_device_eval_batch_size=7,
     weight_decay=0.01,
     save_total_limit=2,
@@ -70,3 +70,12 @@ trainer = Seq2SeqTrainer(
 )
 
 trainer.train()
+
+# xuất model 
+output_dir = "/content/drive/MyDrive/model_add_dau_cau"
+
+import os
+os.makedirs(output_dir, exist_ok=True)
+
+model.save_pretrained(output_dir)
+tokenizer.save_pretrained(output_dir)
