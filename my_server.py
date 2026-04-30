@@ -32,7 +32,7 @@ from my_function import get_model_content , trim_silence
 from convert_voice_loa_phat_thanh import convert_voice_loa_phat_thanh
 from convert_voice_he_thong import convert_voice_he_thong
 from convert_voice_suy_nghi import convert_voice_suy_nghi
-from ADD_dau_cau.func_for_F5Tts import correct_punctuation
+from ADD_dau_cau.func_for_file_my_server import correct_punctuation
 
 
 
@@ -80,14 +80,15 @@ def convert_text():
     try:
         data = request.get_json()
 
-        gen_text_raw = data.get('text') #lấy từ FE
-        gen_text = correct_punctuation(gen_text_raw,tokenizer, model_punct)
-        print(f"text gốc:{gen_text_raw}")
-        gen_text = gen_text.lower()
-        print(f"text đã xử lý punct và lower:{gen_text}")
+        # phân xử lý hàm tự động thêm dấu câu
+        # gen_text_raw = data.get('text') #lấy từ FE
+        # gen_text = correct_punctuation(gen_text_raw,tokenizer, model_punct)
+        # print(f"text gốc:{gen_text_raw}")
+        # gen_text = gen_text.lower()
+        # print(f"text đã xử lý punct và lower:{gen_text}")
         
         # -----lấy value từ FE
-        # gen_text = data.get('text')
+        gen_text = data.get('text')
         model_name = data.get('model_name')
         file_name = f"{data.get('fileName', 'output')}.wav"
         toc_do_doc = float(data.get('toc_do_doc', 0.8))
