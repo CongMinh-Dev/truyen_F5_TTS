@@ -9,8 +9,7 @@ from flask_cors import CORS
 from omegaconf import OmegaConf
 from hydra.utils import get_class
 from pathlib import Path
-import requests #để gọi hàm bên env khác
-PUNCT_SERVER_URL = "http://127.0.0.1:5556/fix_punct"
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 # Thêm đường dẫn
 sys.path.insert(0, "/content/F5-TTS-2")
@@ -33,6 +32,8 @@ from my_function import get_model_content , trim_silence
 from convert_voice_loa_phat_thanh import convert_voice_loa_phat_thanh
 from convert_voice_he_thong import convert_voice_he_thong
 from convert_voice_suy_nghi import convert_voice_suy_nghi
+from ADD_dau_cau.func_for_F5Tts import correct_punctuation
+
 
 
 
@@ -46,6 +47,7 @@ VOCAB_FILE = "/content/F5-TTS-2/data/Emilia_ZH_EN_pinyin/vocab.txt"
 vocoder_name = "vocos"
 OUTPUT_DIR = "/content/F5-TTS-2/output_audio"
 MP3_DIR = "/content/F5-TTS-2/model_name_mp3"
+model_punct_path = "/content/drive/MyDrive/model_add_dau_cau"
 
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
@@ -66,6 +68,11 @@ ema_model = load_model(
     vocab_file=VOCAB_FILE,
     device=device
 )
+
+print(f"--- Đang nạp model punct từ {model_punct_path} vào {device} ---")
+tokenizer = AutoTokenizer.from_pretrained(model_punct_path)
+model_punct = AutoModelForSeq2SeqLM.from_pretrained(model_punct_path)
+
 print("✅ Model đã nạp thành công!")
 
 @app.route('/convert_text', methods=['POST'])
@@ -73,25 +80,11 @@ def convert_text():
     try:
         data = request.get_json()
 
-        raw_text = data.get('text') #lấy từ FE
-        # --- BƯỚC GỌI SERVER python 3.7 ĐỂ FIX DẤU CÂU ---
-        try:
-            # Gửi request POST sang port 5556
-            response = requests.post(
-                PUNCT_SERVER_URL, 
-                json={"text": raw_text}, 
-                timeout=10 # Đợi tối đa 10 giây
-            )
-            
-            if response.status_code == 200:
-                gen_text = response.json().get('fixed_text', raw_text)
-                print(f"🛠️Đã thêm dấu câu: {gen_text}")
-            else:
-                print(f"⚠️ Server Punctuation trả lỗi, dùng văn bản gốc.")
-                gen_text = raw_text
-        except Exception as e:
-            print(f"❌ Không kết nối được Server Punctuation: {e}")
-            gen_text = raw_text
+        gen_text_raw = data.get('text') #lấy từ FE
+        gen_text = correct_punctuation(gen_text_raw)
+        print(f"text gốc:{gen_text_raw}")
+        gen_text = gen_text.lower()
+        print(f"text đã xử lý punct và lower:{gen_text}")
         
         # -----lấy value từ FE
         # gen_text = data.get('text')

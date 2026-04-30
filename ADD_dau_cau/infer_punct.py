@@ -54,8 +54,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_path)
 model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
 
 # Ví dụ nhập một câu cụ thể
+if __name__ == "__main__":
+    result = correct_punctuation(input_text)
 
-result = correct_punctuation(input_text)
-
-print("Kết quả sau khi xử lý:")
-print(result)
+    print("Kết quả sau khi xử lý:")
+    print(result)
