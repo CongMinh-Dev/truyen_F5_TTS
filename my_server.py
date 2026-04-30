@@ -53,7 +53,7 @@ if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
 # --- BƯỚC 1: NẠP MODEL (CHẠY 1 LẦN) ---
-print(f"--- Đang nạp model vào {device} ---")
+print(f"--- Đang nạp model f5-tts vào {device} ---")
 # load vocoder
 vocoder = load_vocoder(vocoder_name=vocoder_name, is_local=False, device=device)
 
