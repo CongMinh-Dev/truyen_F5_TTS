@@ -74,8 +74,6 @@ tokenized_test = test_dataset.map(preprocess_function, batched=True)
 # 5
 model = AutoModelForSeq2SeqLM.from_pretrained("vinai/bartpho-syllable",use_safetensors=True)
 # 6
-from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer
-
 training_args = Seq2SeqTrainingArguments(
     output_dir="./results",
     eval_strategy="epoch",
