@@ -81,7 +81,7 @@ def convert_text():
         data = request.get_json()
 
         gen_text_raw = data.get('text') #lấy từ FE
-        gen_text = correct_punctuation(gen_text_raw)
+        gen_text = correct_punctuation(gen_text_raw,tokenizer, model_punct)
         print(f"text gốc:{gen_text_raw}")
         gen_text = gen_text.lower()
         print(f"text đã xử lý punct và lower:{gen_text}")
