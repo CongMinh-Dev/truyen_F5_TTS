@@ -80,7 +80,7 @@ def convert_text():
     try:
         data = request.get_json()
 
-        # phân xử lý hàm tự động thêm dấu câu
+        # phân xử lý hàm tự động thêm dấu câu-----------------------------------
         # gen_text_raw = data.get('text') #lấy từ FE
         # gen_text = correct_punctuation(gen_text_raw,tokenizer, model_punct)
         # print(f"text gốc:{gen_text_raw}")
